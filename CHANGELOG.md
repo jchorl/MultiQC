@@ -6,6 +6,7 @@
 
 - Major spruce of the command line help, using the new [rich-click](https://github.com/ewels/rich-click) package
 - Drop some of the Python 2k compatability code (eg. custom requirements)
+- Kraken now handles empty kreports gracefully ([#1637](https://github.com/ewels/MultiQC/issues/1637))
 - Improvements for running MultiQC in a Python environment, such as a Jupyter Notebook or script
   - Fixed bug raised when removing logging file handlers between calls that arose when configuring the root logger with dictConfig ([#1643](https://github.com/ewels/MultiQC/issues/1643))
 - Added new config option `custom_table_header_config` to override any config for any table header

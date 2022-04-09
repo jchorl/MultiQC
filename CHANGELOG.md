@@ -12,6 +12,7 @@
 - Added new config option `custom_table_header_config` to override any config for any table header
 - Fixed edge-case bug in custom content where a `description` that doesn't terminate in `.` gave duplicate section descriptions.
 - Tidied the verbose log to remove some very noisy statements and add summaries for skipped files in the search
+- Upgraded jquery tablesorter plugin to v2
 - Fix sorting of table columns with text values
 - Add timezone to time in reports
 - Add nix flake support

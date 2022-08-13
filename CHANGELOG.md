@@ -16,6 +16,7 @@
 - Add nix flake support
 - Upgraded jquery tablesorter plugin to v2
 - Allow specifying default sort columns for tables
+- Add total read count (after filtering) from fastp to general stats table
 
 ### New Modules
 

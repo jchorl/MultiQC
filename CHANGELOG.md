@@ -18,6 +18,7 @@
 - Add timezone to time in reports
 - Add nix flake support
 - Add total read count (after filtering) from fastp to general stats table
+- Report median read-length for fastqc instead of mean
 
 ### New Modules
 

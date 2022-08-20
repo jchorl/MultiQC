@@ -25,16 +25,6 @@ class MultiqcModule(BaseMultiqcModule):
         # Get modifiers from config file
         qconfig = getattr(config, "quast_config", {})
 
-        # Have to prefix these with underscore, because they are being used in the "modify" lambdas,
-        # and at the same time multiqc wipes all non-underscored module attributes after module is run,
-        # so "modify" lambdas will be broken after execution.
-        self._contig_length_multiplier = qconfig.get("contig_length_multiplier", 0.001)
-        self._contig_length_suffix = qconfig.get("contig_length_suffix", "Kbp")
-        self._total_length_multiplier = qconfig.get("total_length_multiplier", 0.000001)
-        self._total_length_suffix = qconfig.get("total_length_suffix", "Mbp")
-        self._total_number_contigs_multiplier = qconfig.get("total_number_contigs_multiplier", 0.001)
-        self._total_number_contigs_suffix = qconfig.get("total_number_contigs_suffix", "K")
-
         # Find and load any QUAST reports
         self.quast_data = {}
         for f in self.find_log_files("quast"):
@@ -51,6 +41,30 @@ class MultiqcModule(BaseMultiqcModule):
             raise ModuleNoSamplesFound
 
         log.info(f"Found {len(self.quast_data)} reports")
+
+        # Have to prefix these with underscore, because they are being used in the "modify" lambdas,
+        # and at the same time multiqc wipes all non-underscored module attributes after module is run,
+        # so "modify" lambdas will be broken after execution.
+        self._contig_length_multiplier = qconfig.get("contig_length_multiplier", 0.001)
+        self._contig_length_suffix = qconfig.get("contig_length_suffix", "Kbp")
+        if self._contig_length_multiplier == "dynamic":
+            self._contig_length_multiplier, self._contig_length_suffix = dynamic_bp_multiplier_and_suffix(
+                self.quast_data, "N50"
+            )
+
+        self._total_length_multiplier = qconfig.get("total_length_multiplier", 0.000001)
+        self._total_length_suffix = qconfig.get("total_length_suffix", "Mbp")
+        if self._total_length_multiplier == "dynamic":
+            self._total_length_multiplier, self._total_length_suffix = dynamic_bp_multiplier_and_suffix(
+                self.quast_data, "Total length"
+            )
+
+        self._total_number_contigs_multiplier = qconfig.get("total_number_contigs_multiplier", 0.001)
+        self._total_number_contigs_suffix = qconfig.get("total_number_contigs_suffix", "K")
+        if self._total_number_contigs_multiplier == "dynamic":
+            self._total_number_contigs_multiplier, self._total_number_contigs_suffix = dynamic_count_multiplier_and_suffix(
+                self.quast_data, "L50"
+            )
 
         # Write parsed report data to a file
         self.write_data_file(self.quast_data, "multiqc_quast")
@@ -346,3 +360,19 @@ class MultiqcModule(BaseMultiqcModule):
             )
         else:
             return None
+
+
+def dynamic_count_multiplier_and_suffix(quast_data, quast_data_key):
+    min_len = min(v.get(quast_data_key) for v in quast_data.values())
+
+    if min_len < 1000:
+        return 1, ""
+    if 1000 <= min_len < 1000000:
+        return 0.001, "K"
+    if min_len >= 1000000:
+        return 0.000001, "M"
+
+
+def dynamic_bp_multiplier_and_suffix(quast_data, quast_data_key):
+    count, suffix = dynamic_count_multiplier_and_suffix(quast_data, quast_data_key)
+    return count, suffix + "bp"

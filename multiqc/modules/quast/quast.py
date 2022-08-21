@@ -60,8 +60,9 @@ class MultiqcModule(BaseMultiqcModule):
         self.total_number_contigs_multiplier = qconfig.get("total_number_contigs_multiplier", 0.001)
         self.total_number_contigs_suffix = qconfig.get("total_number_contigs_suffix", "K")
         if self.total_number_contigs_multiplier == "dynamic":
+            contig_lens, _ = self._contigs_by_bp_len()
             self.total_number_contigs_multiplier, self.total_number_contigs_suffix = dynamic_multiplier_and_suffix(
-                self.quast_data, "L50"
+                contig_lens, "total_contigs"
             )
 
         # Write parsed report data to a file
@@ -269,10 +270,7 @@ class MultiqcModule(BaseMultiqcModule):
         }
         return table.plot(self.quast_data, headers, config)
 
-    def quast_contigs_barplot(self):
-        """Make a bar plot showing the number and length of contigs for each assembly"""
-
-        # Prep the data
+    def _contigs_by_bp_len(self):
         data = dict()
         categories = []
         for s_name, d in self.quast_data.items():
@@ -294,9 +292,16 @@ class MultiqcModule(BaseMultiqcModule):
                     c = str(t) + "-" + str(tresholds[i - 1]) + " bp"
                     cats.append(c)
                     p[c] = nums_by_t[t] - nums_by_t[tresholds[i - 1]]
+                    p["total_contigs"] = nums_by_t[t]  # overwrite every time, because the last record has the total
             if not categories:
                 categories = cats
             data[s_name] = p
+        return data, categories
+
+    def quast_contigs_barplot(self):
+        """Make a bar plot showing the number and length of contigs for each assembly"""
+
+        data, categories = self._contigs_by_bp_len()
 
         pconfig = {
             "id": "quast_num_contigs",

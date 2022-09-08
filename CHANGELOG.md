@@ -55,6 +55,12 @@
 - Add timezone to time in reports
 - Add nix flake support
 - Added automatic tweet about new releases
+- Upgraded jquery tablesorter plugin to v2
+- Allow specifying default sort columns for tables
+
+### New Modules
+
+_nothing yet.._
 
 ### Module updates
 

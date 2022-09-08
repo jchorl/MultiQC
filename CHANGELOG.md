@@ -14,6 +14,8 @@
 - Tidied the verbose log to remove some very noisy statements and add summaries for skipped files in the search
 - Add timezone to time in reports
 - Add nix flake support
+- Upgraded jquery tablesorter plugin to v2
+- Allow specifying default sort columns for tables
 
 ### New Modules
 

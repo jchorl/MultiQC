@@ -58,6 +58,8 @@
 - Added automatic tweet about new releases
 - Kraken now handles empty kreports gracefully ([#1637](https://github.com/ewels/MultiQC/issues/1637))
 - Fix sorting of table columns with text values
+- Upgraded jquery tablesorter plugin to v2
+- Allow specifying default sort columns for tables
 
 ### New Modules
 

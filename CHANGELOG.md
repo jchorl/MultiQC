@@ -56,6 +56,11 @@
 - Add timezone to time in reports
 - Add nix flake support
 - Added automatic tweet about new releases
+- Kraken now handles empty kreports gracefully ([#1637](https://github.com/ewels/MultiQC/issues/1637))
+
+### New Modules
+
+_nothing yet.._
 
 ### Module updates
 

@@ -16,6 +16,7 @@
 - Add new code formatting tool [isort](https://pycqa.github.io/isort/) to standardise the order and formatting of Python module imports
 - Remove Python 2-3 compatability `from __future__` imports
 - Fix Kraken duplicate heatmap to account for missing taxons
+- Update fastp to use passing filter reads from filtering results, rather than total reads after filtering ([relevant issue](https://github.com/OpenGene/fastp/issues/367))
 
 ### New Modules
 

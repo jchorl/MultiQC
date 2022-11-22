@@ -57,6 +57,7 @@
 - Add nix flake support
 - Added automatic tweet about new releases
 - Kraken now handles empty kreports gracefully ([#1637](https://github.com/ewels/MultiQC/issues/1637))
+- Fix sorting of table columns with text values
 
 ### New Modules
 

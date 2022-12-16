@@ -60,7 +60,7 @@ class MultiqcModule(BaseMultiqcModule):
         self.total_number_contigs_multiplier = qconfig.get("total_number_contigs_multiplier", 0.001)
         self.total_number_contigs_suffix = qconfig.get("total_number_contigs_suffix", "K")
         if self.total_number_contigs_multiplier == "dynamic":
-            self.total_number_contigs_multiplier, self.total_number_contigs_suffix = dynamic_bp_multiplier_and_suffix(
+            self.total_number_contigs_multiplier, self.total_number_contigs_suffix = dynamic_count_multiplier_and_suffix(
                 self.quast_data, "L50"
             )
 
@@ -367,12 +367,17 @@ class MultiqcModule(BaseMultiqcModule):
             return None
 
 
-def dynamic_bp_multiplier_and_suffix(quast_data, quast_data_key):
+def dynamic_count_multiplier_and_suffix(quast_data, quast_data_key):
     min_len = min(v.get(quast_data_key) for v in quast_data.values())
 
     if min_len < 1000:
-        return 1, "bp"
+        return 1, ""
     if 1000 <= min_len < 1000000:
-        return 0.001, "Kbp"
+        return 0.001, "K"
     if min_len >= 1000000:
-        return 0.000001, "Mbp"
+        return 0.000001, "M"
+
+
+def dynamic_bp_multiplier_and_suffix(quast_data, quast_data_key):
+    count, suffix = dynamic_count_multiplier_and_suffix(quast_data, quast_data_key)
+    return count, suffix + "bp"

@@ -75,6 +75,7 @@
 - Add nix flake support
 - Added automatic tweet about new releases
 - Breaking: Removed `--cl_config` option. Please use `--cl-config` instead.
+- Kraken now handles empty kreports gracefully ([#1637](https://github.com/ewels/MultiQC/issues/1637))
 
 ### Module updates
 

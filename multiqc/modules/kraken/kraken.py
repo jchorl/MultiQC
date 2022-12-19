@@ -40,7 +40,7 @@ class MultiqcModule(BaseMultiqcModule):
         self.t_ranks["K"] = "Kingdom"
         self.t_ranks["D"] = "Domain"
         self.t_ranks["R"] = "Root"
-        # self.t_ranks['U'] = 'Unclassified'
+        self.t_ranks["U"] = "Unclassified"
 
         self.top_n = 5
 
@@ -271,28 +271,35 @@ class MultiqcModule(BaseMultiqcModule):
             except KeyError:
                 # No species-level data found etc
                 pass
-        top_one_hkey = "% {}".format(top_five[0])
 
         # Column headers
         headers = OrderedDict()
-        headers[top_one_hkey] = {
-            "title": top_one_hkey,
-            "description": "Percentage of reads that were the top {} over all samples - {}".format(
-                top_rank_name, top_five[0]
-            ),
-            "suffix": "%",
-            "max": 100,
-            "scale": "PuBuGn",
-        }
-        headers["% Top 5"] = {
-            "title": "% Top 5 {}".format(top_rank_name),
-            "description": "Percentage of reads that were classified by one of the top 5 {} ({})".format(
-                top_rank_name, ", ".join(top_five)
-            ),
-            "suffix": "%",
-            "max": 100,
-            "scale": "PuBu",
-        }
+
+        top_one_hkey = None
+
+        # don't include top-5 % in general stats if all is unclassified.
+        # unclassified is included separately, so also don't include twice
+        if top_rank_code != "U":
+            top_one_hkey = "% {}".format(top_five[0])
+            headers[top_one_hkey] = {
+                "title": top_one_hkey,
+                "description": "Percentage of reads that were the top {} over all samples - {}".format(
+                    top_rank_name, top_five[0]
+                ),
+                "suffix": "%",
+                "max": 100,
+                "scale": "PuBuGn",
+            }
+            headers["% Top 5"] = {
+                "title": "% Top 5 {}".format(top_rank_name),
+                "description": "Percentage of reads that were classified by one of the top 5 {} ({})".format(
+                    top_rank_name, ", ".join(top_five)
+                ),
+                "suffix": "%",
+                "max": 100,
+                "scale": "PuBu",
+            }
+
         headers["% Unclassified"] = {
             "title": "% Unclassified",
             "description": "Percentage of reads that were unclassified",
@@ -317,7 +324,7 @@ class MultiqcModule(BaseMultiqcModule):
                 if row["rank_code"] == top_rank_code and row["classif"] == top_five[0]:
                     tdata[s_name][top_one_hkey] = percent
 
-            if top_one_hkey not in tdata[s_name]:
+            if top_one_hkey is not None and top_one_hkey not in tdata[s_name]:
                 tdata[s_name][top_one_hkey] = 0
 
         self.general_stats_addcols(tdata, headers)
@@ -357,13 +364,16 @@ class MultiqcModule(BaseMultiqcModule):
                         rank_data[s_name] = dict()
                     if s_name not in counts_shown:
                         counts_shown[s_name] = 0
+
                     for row in d:
-                        if row["rank_code"] == rank_code:
-                            if row["classif"] == classif:
-                                if classif not in rank_data[s_name]:
-                                    rank_data[s_name][classif] = 0
-                                rank_data[s_name][classif] += row["counts_rooted"]
-                                counts_shown[s_name] += row["counts_rooted"]
+                        # unclassified are handled separately
+                        if row["rank_code"] != "U":
+                            if row["rank_code"] == rank_code:
+                                if row["classif"] == classif:
+                                    if classif not in rank_data[s_name]:
+                                        rank_data[s_name][classif] = 0
+                                    rank_data[s_name][classif] += row["counts_rooted"]
+                                    counts_shown[s_name] += row["counts_rooted"]
 
             # Add in unclassified reads and "other" - we presume from other species etc.
             for s_name, d in self.kraken_raw_data.items():

@@ -79,6 +79,11 @@
 - Upgraded jquery tablesorter plugin to v2
 - Allow specifying default sort columns for tables
 
+### New Modules
+
+- [**Nextclade**](https://github.com/nextstrain/nextclade)
+  - Tool that assigns clades to SARS-CoV-2 samples
+
 ### Module updates
 
 - **AdapterRemoval**

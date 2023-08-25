@@ -197,43 +197,44 @@ class MultiqcModule(BaseMultiqcModule):
                     ),
                 )
 
-                assert cov_dist_data, "cov_dist_data is built from the same source and must exist here"
-                # Write data to file, sort columns numerically and convert to strings
-                cov_dist_data_writeable = {
-                    sample: {str(k): v for k, v in sorted(data.items())} for sample, data in cov_dist_data.items()
-                }
-                self.write_data_file(cov_dist_data_writeable, f"mosdepth_cov{fn_suf}_dist")
+                if cov_dist_data:
+                    assert cov_dist_data, "cov_dist_data is built from the same source and must exist here"
+                    # Write data to file, sort columns numerically and convert to strings
+                    cov_dist_data_writeable = {
+                        sample: {str(k): v for k, v in sorted(data.items())} for sample, data in cov_dist_data.items()
+                    }
+                    self.write_data_file(cov_dist_data_writeable, f"mosdepth_cov{fn_suf}_dist")
 
-                # Set ymax so that zero coverage values are ignored.
-                ymax = 0
-                for data in cov_dist_data.values():
-                    positive_cov = [percent for cov, percent in data.items() if cov > 0]
-                    if positive_cov:
-                        ymax = max(ymax, max(positive_cov))
+                    # Set ymax so that zero coverage values are ignored.
+                    ymax = 0
+                    for data in cov_dist_data.values():
+                        positive_cov = [percent for cov, percent in data.items() if cov > 0]
+                        if positive_cov:
+                            ymax = max(ymax, max(positive_cov))
 
-                self.add_section(
-                    name=f"Coverage distribution{title_suf}",
-                    anchor=f"mosdepth-coverage-dist{id_suf}-cov",
-                    description=(
-                        f"Proportion of bases in the reference genome with a given " f"depth of coverage{descr_suf}"
-                    ),
-                    helptext=coverage_histogram_helptext,
-                    plot=linegraph.plot(
-                        cov_dist_data,
-                        {
-                            "id": f"mosdepth-coverage-dist{id_suf}-id",
-                            "title": f"Mosdepth: Coverage distribution{title_suf}",
-                            "xlab": "Coverage (X)",
-                            "ylab": "% bases in genome/regions covered by X reads",
-                            "ymax": ymax * 1.05,
-                            "yCeiling": 100,
-                            "xmax": xmax,
-                            "tt_label": "<b>{point.x}X</b>: {point.y:.2f}%",
-                            "smooth_points": 500,
-                        },
-                    ),
-                )
-            if perchrom_avg_data:
+                    self.add_section(
+                        name=f"Coverage distribution{title_suf}",
+                        anchor=f"mosdepth-coverage-dist{id_suf}-cov",
+                        description=(
+                            f"Proportion of bases in the reference genome with a given " f"depth of coverage{descr_suf}"
+                        ),
+                        helptext=coverage_histogram_helptext,
+                        plot=linegraph.plot(
+                            cov_dist_data,
+                            {
+                                "id": f"mosdepth-coverage-dist{id_suf}-id",
+                                "title": f"Mosdepth: Coverage distribution{title_suf}",
+                                "xlab": "Coverage (X)",
+                                "ylab": "% bases in genome/regions covered by X reads",
+                                "ymax": ymax * 1.05,
+                                "yCeiling": 100,
+                                "xmax": xmax,
+                                "tt_label": "<b>{point.x}X</b>: {point.y:.2f}%",
+                                "smooth_points": 500,
+                            },
+                        ),
+                    )
+            if False:
                 # Write data to file
                 self.write_data_file(perchrom_avg_data, f"mosdepth_perchrom{fn_suf}")
 

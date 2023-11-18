@@ -398,6 +398,12 @@ for more information.
 - Add nix flake support
 - Added automatic tweet about new releases
 - Breaking: Removed `--cl_config` option. Please use `--cl-config` instead.
+- Upgraded jquery tablesorter plugin to v2
+- Allow specifying default sort columns for tables
+
+### New Modules
+
+_nothing yet.._
 
 ### Module updates
 

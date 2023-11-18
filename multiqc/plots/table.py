@@ -355,8 +355,13 @@ def make_table(dt: table_object.DataTable):
     html += """
         <div id="{tid}_container" class="mqc_table_container">
             <div class="table-responsive mqc-table-responsive {cc}">
-                <table id="{tid}" class="table table-condensed mqc_table" data-title="{title}">
-        """.format(tid=table_id, title=table_title, cc=collapse_class)
+                <table id="{tid}" class="table table-condensed mqc_table" data-title="{title}" data-sortlist="{sortlist}">
+        """.format(
+        tid=table_id,
+        title=table_title,
+        cc=collapse_class,
+        sortlist=_get_sortlist(dt),
+    )
 
     # Build the header row
     col1_header = dt.pconfig.get("col1_header", "Sample Name")
@@ -425,3 +430,31 @@ def make_table(dt: table_object.DataTable):
         report.saved_raw_data[fn] = dt.raw_vals
 
     return html
+
+
+def _get_sortlist(dt):
+    defaultsort = dt.pconfig.get("defaultsort")
+    if defaultsort is None:
+        return ""
+
+    headers = dt.get_headers_in_order()
+    sortlist = []
+
+    # defaultsort is a list of {column, direction} objects
+    for d in defaultsort:
+        # the idx first el of the triple is not actualy unique, it's the bucket
+        # so we must enumerate ourselves here
+        try:
+            idx = next(idx for idx, (_, k, header) in enumerate(headers) if k == d["column"])
+        except StopIteration:
+            logger.warning(
+                "Tried to sort by column '%s', but column was not found. Available columns: %s",
+                d["column"],
+                [k for (_, k, _) in headers],
+            )
+            return ""
+        idx += 1  # to account for col1_header
+        direction = 0 if d["direction"] == "asc" else 1
+        sortlist.append([idx, direction])
+
+    return str(sortlist)

@@ -66,6 +66,7 @@ setup(
         "importlib-metadata",
         "humanize",
         "pyaml-env",
+        "natsort",
     ],
     entry_points={
         "console_scripts": [

@@ -6,6 +6,8 @@ import logging
 import random
 from collections import defaultdict
 
+from natsort import natsorted
+
 from multiqc.plots import beeswarm, table_object
 from multiqc.utils import config, mqc_colour, report, util_functions
 
@@ -366,7 +368,7 @@ def make_table(dt: table_object.DataTable):
     html += "<tbody>"
     t_row_keys = t_rows.keys()
     if dt.pconfig.get("sortRows") is not False:
-        t_row_keys = sorted(t_row_keys)
+        t_row_keys = natsorted(t_row_keys)
     for s_name in t_row_keys:
         # Hide the row if all cells are empty or hidden
         row_hidden = ' style="display:none"' if all(t_rows_empty[s_name].values()) else ""

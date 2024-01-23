@@ -13,6 +13,8 @@ import random
 import re
 import sys
 
+from natsort import natsorted
+
 from multiqc.utils import config, mqc_colour, report, util_functions
 
 logger = logging.getLogger(__name__)
@@ -135,7 +137,7 @@ def plot(data, cats=None, pconfig=None):
     plotsamples = list()
     plotdata = list()
     for idx, d in enumerate(data):
-        hc_samples = sorted(list(d.keys()))
+        hc_samples = natsorted(list(d.keys()))
         hc_data = list()
         sample_dcount = dict()
         for c in cats[idx].keys():

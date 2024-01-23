@@ -11,6 +11,8 @@ import random
 import re
 import sys
 
+from natsort import natsorted
+
 from multiqc.utils import config, mqc_colour, report, util_functions
 
 logger = logging.getLogger(__name__)
@@ -119,7 +121,7 @@ def plot(data, pconfig=None):
     for data_index, d in enumerate(data):
         thisplotdata = list()
 
-        for s in sorted(d.keys()):
+        for s in natsorted(d.keys()):
             # Ensure any overwritten conditionals from data_labels (e.g. ymax) are taken in consideration
             series_config = pconfig.copy()
             if "data_labels" in pconfig and isinstance(
@@ -148,7 +150,7 @@ def plot(data, pconfig=None):
                 # If it never comes back into the plot, discard. If it goes above then comes back, just hide.
                 discard_ymax = None
                 discard_ymin = None
-                for k in sorted(d[s].keys()):
+                for k in natsorted(d[s].keys()):
                     if "xmax" in series_config and float(k) > float(series_config["xmax"]):
                         continue
                     if "xmin" in series_config and float(k) < float(series_config["xmin"]):
@@ -165,7 +167,7 @@ def plot(data, pconfig=None):
                             discard_ymin = False
 
                 # Build the plot data structure
-                for k in sorted(d[s].keys()):
+                for k in natsorted(d[s].keys()):
                     if k is not None:
                         if "xmax" in series_config and float(k) > float(series_config["xmax"]):
                             continue

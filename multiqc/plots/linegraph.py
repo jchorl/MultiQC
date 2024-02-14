@@ -3,6 +3,8 @@
 import logging
 from typing import List, Dict, Union, Tuple
 
+from natsort import natsorted
+
 from multiqc import config
 from multiqc.plots.plotly.line import LinePlotConfig
 from multiqc.utils import mqc_colour
@@ -63,7 +65,7 @@ def plot(
     datasets: List[List[Dict]] = []
     for ds_idx, data_by_sample in enumerate(data):
         this_list_of_series: List[Dict] = []
-        for s in sorted(data_by_sample.keys()):
+        for s in natsorted(data_by_sample.keys()):
             # Ensure any overwritten conditionals from data_labels (e.g. ymax) are taken in consideration
             series_config: LinePlotConfig = pconfig.model_copy()
             pairs: List[Tuple[Union[float, int, str], Union[float, int]]] = []
@@ -77,7 +79,7 @@ def plot(
             discard_ymin = None
             xs = data_by_sample[s].keys()
             if not x_are_categories:
-                xs = sorted(xs)
+                xs = natsorted(xs)
 
             for k in xs:
                 if not x_are_categories:

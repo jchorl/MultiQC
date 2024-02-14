@@ -12,6 +12,7 @@ dependencies = [
     "jinja2>=3.0.0",
     "kaleido",  # for flat plot export
     "markdown",
+    "natsort",
     "numpy",
     "packaging",
     "requests",

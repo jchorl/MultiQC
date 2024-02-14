@@ -2,6 +2,8 @@ import logging
 from collections import defaultdict
 from typing import Tuple, Optional, List, Dict
 
+from natsort import natsorted
+
 from multiqc.plots.table_object import DataTable, ValueT
 from multiqc import config, report
 from multiqc.utils import mqc_colour
@@ -275,7 +277,7 @@ def make_table(
         if len(t_headers) > 1:
             buttons.append(
                 f"""
-            <button type="button" class="mqc_table_configModal_btn btn btn-default btn-sm" data-toggle="modal" 
+            <button type="button" class="mqc_table_configModal_btn btn btn-default btn-sm" data-toggle="modal"
                 data-target="#{dt.id}_configModal">
                 <span class="glyphicon glyphicon-th"></span> Configure columns
             </button>
@@ -285,7 +287,7 @@ def make_table(
         # Sort By Highlight button
         buttons.append(
             f"""
-        <button type="button" class="mqc_table_sortHighlight btn btn-default btn-sm" 
+        <button type="button" class="mqc_table_sortHighlight btn btn-default btn-sm"
             data-target="#{dt.id}" data-direction="desc" style="display:none;">
             <span class="glyphicon glyphicon-sort-by-attributes-alt"></span> Sort by highlight
         </button>
@@ -296,7 +298,7 @@ def make_table(
         if len(t_headers) > 1:
             buttons.append(
                 f"""
-            <button type="button" class="mqc_table_makeScatter btn btn-default btn-sm" 
+            <button type="button" class="mqc_table_makeScatter btn btn-default btn-sm"
                 data-toggle="modal" data-target="#tableScatterModal" data-table="#{dt.id}">
                 <span class="glyphicon glyphicon glyphicon-equalizer"></span> Scatter plot
             </button>
@@ -306,7 +308,7 @@ def make_table(
         if violin_id is not None:
             buttons.append(
                 f"""
-            <button type="button" class="mqc-table-to-violin btn btn-default btn-sm" 
+            <button type="button" class="mqc-table-to-violin btn btn-default btn-sm"
                 data-table-id="{dt.id}" data-violin-id="{violin_id}">
                 <span class="glyphicon glyphicon-align-left"></span> Violin plot
             </button>
@@ -315,7 +317,7 @@ def make_table(
 
         buttons.append(
             f"""
-        <button type="button" class="export-plot btn btn-default btn-sm" 
+        <button type="button" class="export-plot btn btn-default btn-sm"
             data-pid="{violin_id or dt.id}" data-type="table"
         >Export as CSV</button>
         """
@@ -362,7 +364,7 @@ def make_table(
     html += "<tbody>"
     t_row_keys = list(t_rows.keys())
     if dt.pconfig.sort_rows:
-        t_row_keys = sorted(t_row_keys)
+        t_row_keys = natsorted(t_row_keys)
     for s_name in t_row_keys:
         # Hide the row if all cells are empty or hidden
         row_hidden = ' style="display:none"' if all(t_rows_empty[s_name].values()) else ""

@@ -4,6 +4,8 @@ from typing import List, Dict, Union, OrderedDict
 
 import logging
 
+from natsort import natsorted
+
 from multiqc import config
 from multiqc.plots.plotly.box import BoxT, BoxPlotConfig
 from multiqc.plots.plotly import box
@@ -43,7 +45,7 @@ def plot(
             # want to keep the sample order https://github.com/MultiQC/MultiQC/issues/2204
             pass
         elif pconf.sort_samples:
-            samples = sorted(list(list_of_data_by_sample[0].keys()))
+            samples = natsorted(list(list_of_data_by_sample[0].keys()))
             list_of_data_by_sample[i] = {s: list_of_data_by_sample[i][s] for s in samples}
 
     # Make a plot - custom, interactive or flat

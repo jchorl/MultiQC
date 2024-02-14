@@ -9,6 +9,7 @@ import re
 from collections import defaultdict
 from typing import List, Tuple, Dict, Optional, Union, Mapping, Callable
 
+from natsort import natsorted
 from pydantic import BaseModel, Field
 
 from multiqc import config, report
@@ -439,7 +440,7 @@ class DataTable(BaseModel):
         """
         res = list()
         # Scan through self.headers_in_order and just bolt on the actual header info
-        for bucket in sorted(self.headers_in_order):
+        for bucket in natsorted(self.headers_in_order):
             for bucket_idx, k in self.headers_in_order[bucket]:
                 res.append((bucket_idx, k, self.headers[bucket_idx][k]))
         return res

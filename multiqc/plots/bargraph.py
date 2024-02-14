@@ -6,6 +6,8 @@ from typing import Union, Dict, Optional, List, Sequence, Any, cast, Mapping
 
 import math
 
+from natsort import natsorted
+
 from multiqc import config
 from multiqc.core.exceptions import RunError
 from multiqc.plots.plotly import bar
@@ -129,7 +131,7 @@ def plot(
             # want to keep the sample order https://github.com/MultiQC/MultiQC/issues/2204
             pass
         elif pconf.sort_samples:
-            hc_samples = sorted(list(d.keys()))
+            hc_samples = natsorted(list(d.keys()))
         hc_data = list()
         sample_d_count = dict()
         for c in categories_per_ds[idx].keys():

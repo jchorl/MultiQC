@@ -2,7 +2,13 @@ import logging
 from collections import defaultdict
 from typing import Tuple, Optional, List, Dict
 
+<<<<<<< HEAD
 from multiqc.plots.table_object import DataTable, ValueT
+=======
+from natsort import natsorted
+
+from multiqc.plots.table_object import DataTable
+>>>>>>> f50cf72f (natural sort for charts)
 from multiqc import config, report
 from multiqc.utils import mqc_colour
 
@@ -362,7 +368,7 @@ def make_table(
     html += "<tbody>"
     t_row_keys = list(t_rows.keys())
     if dt.pconfig.sort_rows:
-        t_row_keys = sorted(t_row_keys)
+        t_row_keys = natsorted(t_row_keys)
     for s_name in t_row_keys:
         # Hide the row if all cells are empty or hidden
         row_hidden = ' style="display:none"' if all(t_rows_empty[s_name].values()) else ""

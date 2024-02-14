@@ -6,6 +6,8 @@ from typing import Union, Dict
 
 import math
 
+from natsort import natsorted
+
 from multiqc import config
 from multiqc.plots.plotly import bar
 from multiqc.plots.plotly.bar import BarPlotConfig
@@ -96,7 +98,7 @@ def plot(
             # want to keep the sample order https://github.com/MultiQC/MultiQC/issues/2204
             pass
         elif pconfig.sort_samples:
-            hc_samples = sorted(list(d.keys()))
+            hc_samples = natsorted(list(d.keys()))
         hc_data = list()
         sample_dcount = dict()
         for c in cats[idx].keys():

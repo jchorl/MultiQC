@@ -3,6 +3,8 @@
 import logging
 from typing import List, Dict, Union, Tuple
 
+from natsort import natsorted
+
 from multiqc import config
 from multiqc.plots.plotly.line import LinePlotConfig, Series, ValueT
 from multiqc.utils import mqc_colour
@@ -60,7 +62,7 @@ def plot(
     datasets: List[List[Series]] = []
     for ds_idx, data_by_sample in enumerate(data):
         list_of_series_dicts: List[Series] = []
-        for s in sorted(data_by_sample.keys()):
+        for s in natsorted(data_by_sample.keys()):
             series: Series = _make_series_dict(pconfig, ds_idx, s, data_by_sample[s])
             if pconfig.hide_empty and not series.pairs:
                 continue
@@ -133,7 +135,7 @@ def _make_series_dict(
     discard_ymin = None
     xs = y_by_x.keys()
     if not x_are_categories:
-        xs = sorted(xs)
+        xs = natsorted(xs)
 
     for x in xs:
         if not x_are_categories:

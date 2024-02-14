@@ -10,6 +10,8 @@ from collections import OrderedDict
 import math
 import re
 
+from natsort import natsorted
+
 from multiqc.utils import config, mqc_colour, report
 from multiqc.plots.plotly import bar
 
@@ -124,7 +126,7 @@ def plot(data, cats=None, pconfig=None):
             # want to keep the sample order https://github.com/MultiQC/MultiQC/issues/2204
             pass
         elif pconfig.get("sort_samples", True):
-            hc_samples = sorted(list(d.keys()))
+            hc_samples = natsorted(list(d.keys()))
         hc_data = list()
         sample_dcount = dict()
         for c in cats[idx].keys():

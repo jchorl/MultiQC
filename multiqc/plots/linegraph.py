@@ -7,6 +7,8 @@ import logging
 import re
 from typing import List, Dict
 
+from natsort import natsorted
+
 from multiqc.utils import config, mqc_colour, report
 from multiqc.plots.plotly import line
 
@@ -108,7 +110,7 @@ def plot(data, pconfig=None):
                 dataset_config["categories"] = list()
 
             # Add any new categories
-            for s in sorted(d.keys()):
+            for s in natsorted(d.keys()):
                 for k in d[s].keys():
                     if k not in dataset_config["categories"]:
                         dataset_config["categories"].append(k)
@@ -120,7 +122,7 @@ def plot(data, pconfig=None):
             pconfig["data_labels"] = [({"label": dl} if isinstance(dl, str) else dl) for dl in pconfig["data_labels"]]
             pconfig["data_labels"][data_index]["categories"] = dataset_config["categories"]
 
-        for s in sorted(d.keys()):
+        for s in natsorted(d.keys()):
             # Ensure any overwritten conditionals from data_labels (e.g. ymax) are taken in consideration
             series_config = dataset_config.copy()
             pairs = []
@@ -138,7 +140,7 @@ def plot(data, pconfig=None):
                 # If it never comes back into the plot, discard. If it goes above then comes back, just hide.
                 discard_ymax = None
                 discard_ymin = None
-                for k in sorted(d[s].keys()):
+                for k in natsorted(d[s].keys()):
                     if "xmax" in series_config and float(k) > float(series_config["xmax"]):
                         continue
                     if "xmin" in series_config and float(k) < float(series_config["xmin"]):
@@ -155,7 +157,7 @@ def plot(data, pconfig=None):
                             discard_ymin = False
 
                 # Build the plot data structure
-                for k in sorted(d[s].keys()):
+                for k in natsorted(d[s].keys()):
                     if k is not None:
                         if "xmax" in series_config and float(k) > float(series_config["xmax"]):
                             continue

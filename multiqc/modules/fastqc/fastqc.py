@@ -122,11 +122,12 @@ class MultiqcModule(BaseMultiqcModule):
                     except KeyError:
                         statuses[section] = {s_name: status}
 
-        self.intro += '<script type="application/json" class="fastqc_passfails">{}</script>'.format(
-            json.dumps([self.anchor.replace("-", "_"), statuses])
-        )
-        if status_checks:
-            self.intro += '<script type="text/javascript">load_fastqc_passfails();</script>'
+        if not config.simple_output:
+            self.intro += '<script type="application/json" class="fastqc_passfails">{}</script>'.format(
+                json.dumps([self.anchor.replace("-", "_"), statuses])
+            )
+            if status_checks:
+                self.intro += '<script type="text/javascript">load_fastqc_passfails();</script>'
 
         # Now add each section in order
         self.read_count_plot()
@@ -1063,7 +1064,7 @@ class MultiqcModule(BaseMultiqcModule):
             name="Top overrepresented sequences",
             anchor="fastqc_top_overrepresented_sequences",
             description=f"""
-            Top overrepresented sequences across all samples. The table shows {top_n} 
+            Top overrepresented sequences across all samples. The table shows {top_n}
             most overrepresented sequences across all samples, ranked by {ranked_by}.
             """,
             plot=table.plot(

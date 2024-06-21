@@ -402,8 +402,6 @@ class MultiqcModule(BaseMultiqcModule):
             bs = self.fastqc_data[s_name]["basic_statistics"]
             # Samples with 0 reads and reports with some skipped sections might be missing things here
             data[s_name]["percent_gc"] = bs.get("%GC", 0)
-            data[s_name]["avg_sequence_length"] = bs.get("avg_sequence_length", 0)
-            data[s_name]["median_sequence_length"] = bs.get("median_sequence_length", 0)
             data[s_name]["total_sequences"] = bs.get("Total Sequences", 0)
 
             # Log warning about zero-read samples as a courtesy
@@ -429,14 +427,6 @@ class MultiqcModule(BaseMultiqcModule):
                 # If we had no reads then we have no sample in data
                 pass
 
-        # Are sequence lengths interesting?
-        median_seq_lengths = [x["median_sequence_length"] for x in data.values()]
-        try:
-            hide_seq_length = max(median_seq_lengths) - min(median_seq_lengths) <= 10
-        except ValueError:
-            # Zero reads
-            hide_seq_length = True
-
         headers = {
             "percent_duplicates": {
                 "title": "% Dups",
@@ -454,24 +444,6 @@ class MultiqcModule(BaseMultiqcModule):
                 "suffix": "%",
                 "scale": "PuRd",
                 "format": "{:,.0f}",
-            },
-            "avg_sequence_length": {
-                "title": "Average Read Length",
-                "description": "Average Read Length (bp)",
-                "min": 0,
-                "suffix": " bp",
-                "scale": "RdYlGn",
-                "format": "{:,.0f}",
-                "hidden": True,
-            },
-            "median_sequence_length": {
-                "title": "Median Read Length",
-                "description": "Median Read Length (bp)",
-                "min": 0,
-                "suffix": " bp",
-                "scale": "RdYlGn",
-                "format": "{:,.0f}",
-                "hidden": hide_seq_length,
             },
             "percent_fails": {
                 "title": "% Failed",
@@ -1217,7 +1189,7 @@ class MultiqcModule(BaseMultiqcModule):
             name="Top overrepresented sequences",
             anchor="fastqc_top_overrepresented_sequences",
             description=f"""
-            Top overrepresented sequences across all samples. The table shows {top_n} 
+            Top overrepresented sequences across all samples. The table shows {top_n}
             most overrepresented sequences across all samples, ranked by {ranked_by}.
             """,
             plot=table.plot(

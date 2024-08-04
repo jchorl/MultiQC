@@ -65,7 +65,9 @@ def make_table(
         )
 
         ns = f"{header.namespace}: " if header.namespace else ""
-        cell_contents = f'<span class="mqc_table_tooltip" title="{ns}{header.description}">{header.title}</span>'
+        cell_contents = (
+            f'<span class="mqc_table_tooltip" title="{ns}{header.description}" data-html="true">{header.title}</span>'
+        )
 
         t_headers[rid] = '<th id="header_{rid}" class="{rid} {h}" {da}>{c}</th>'.format(
             rid=rid, h=hide, da=data_attr, c=cell_contents
@@ -275,10 +277,18 @@ def make_table(
 
         # Configure Columns Button
         if len(t_headers) > 1:
+            # performance degrades substantially when configuring thousands of columns
+            # it is effectively unusable.
+            disabled_class = ""
+            disabled_attrs = ""
+            if _is_configure_columns_disabled(len(t_headers)):
+                disabled_class = "mqc_table_tooltip"
+                disabled_attrs = 'disabled title="Table is too large to configure columns"'
+
             buttons.append(
                 f"""
-            <button type="button" class="mqc_table_configModal_btn btn btn-default btn-sm" data-toggle="modal"
-                data-target="#{dt.id}_configModal">
+            <button type="button" class="mqc_table_configModal_btn btn btn-default btn-sm {disabled_class}" data-toggle="modal"
+                data-target="#{dt.id}_configModal" {disabled_attrs}>
                 <span class="glyphicon glyphicon-th"></span> Configure columns
             </button>
             """
@@ -387,7 +397,7 @@ def make_table(
 
     # Build the bootstrap modal to customise columns and order
     modal = ""
-    if not config.simple_output and add_control_panel:
+    if not config.simple_output and add_control_panel and not _is_configure_columns_disabled(len(t_headers)):
         modal = _configuration_modal(
             tid=dt.id,
             title=table_title,
@@ -404,7 +414,7 @@ def _configuration_modal(tid: str, title: str, trows: str, violin_id: Optional[s
         data += f" data-violin-id='{violin_id}'"
     return f"""
     <!-- MultiQC Table Columns Modal -->
-    <div class="modal fade" id="{tid}_configModal" tabindex="-1">
+    <div class="modal fade mqc_configModal" id="{tid}_configModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -485,3 +495,7 @@ def _get_sortlist(dt: DataTable) -> str:
         sortlist.append([idx, direction])
 
     return str(sortlist)
+
+
+def _is_configure_columns_disabled(num_columns: int) -> bool:
+    return num_columns > 50

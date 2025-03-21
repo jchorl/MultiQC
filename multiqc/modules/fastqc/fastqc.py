@@ -34,8 +34,6 @@ class Metrics:
 
     total_sequences: float = 0
     percent_gc: float = 0
-    avg_sequence_length: float = 0
-    median_sequence_length: float = 0
     percent_duplicates: float = 0
     percent_fails: float = 0
 
@@ -413,10 +411,6 @@ class MultiqcModule(BaseMultiqcModule):
                 # this isn't technically correct, because we can't know what the distribution
                 # is within that range. Probably good enough though.
                 median = int(_range_bp_to_num(d["length"], method="median"))
-        if total_read_count > 0:
-            self.fastqc_data[s_name]["basic_statistics"]["avg_sequence_length"] = running_bp_sum / total_read_count
-        if median is not None:
-            self.fastqc_data[s_name]["basic_statistics"]["median_sequence_length"] = median
         return s_name
 
     def fastqc_general_stats(self):
@@ -431,8 +425,6 @@ class MultiqcModule(BaseMultiqcModule):
             data_by_sample[s_name] = Metrics(
                 total_sequences=bs.get("Total Sequences", 0),
                 percent_gc=bs.get("%GC", 0),
-                avg_sequence_length=bs.get("avg_sequence_length", 0),
-                median_sequence_length=bs.get("median_sequence_length", 0),
             )
 
             # Log warning about zero-read samples as a courtesy
@@ -453,14 +445,6 @@ class MultiqcModule(BaseMultiqcModule):
             if num_statuses > 0:
                 # Make sure we have reads, otherwise there are no sample in data
                 data_by_sample[s_name].percent_fails = (float(num_fails) / float(num_statuses)) * 100.0
-
-        # Are sequence lengths interesting?
-        median_seq_lengths = [x.median_sequence_length for x in data_by_sample.values()]
-        try:
-            hide_seq_length = max(median_seq_lengths) - min(median_seq_lengths) <= 10
-        except ValueError:
-            # Zero reads
-            hide_seq_length = True
 
         def _summarize_statues(merged_row: InputRow, group_s_names: List[Tuple[Optional[str], SampleName, SampleName]]):
             # Add count of fail statuses
@@ -497,24 +481,6 @@ class MultiqcModule(BaseMultiqcModule):
                     "scale": "PuRd",
                     "format": "{:,.1f}",
                 },
-                ColumnKey("avg_sequence_length"): {
-                    "title": "Avg len",
-                    "description": "Average read length",
-                    "min": 0,
-                    "suffix": " bp",
-                    "scale": "RdYlGn",
-                    "format": "{:,.0f}",
-                    "hidden": True,
-                },
-                ColumnKey("median_sequence_length"): {
-                    "title": "Median len",
-                    "description": "Median read length",
-                    "min": 0,
-                    "suffix": " bp",
-                    "scale": "RdYlGn",
-                    "format": "{:,.0f}",
-                    "hidden": hide_seq_length,
-                },
                 ColumnKey("percent_fails"): {
                     "title": "Failed",
                     "description": "Percentage of modules failed in FastQC report (includes those not plotted here)",
@@ -537,9 +503,7 @@ class MultiqcModule(BaseMultiqcModule):
                 cols_to_sum=[ColumnKey("total_sequences")],
                 cols_to_weighted_average=[
                     (ColumnKey("percent_gc"), ColumnKey("total_sequences")),
-                    (ColumnKey("avg_sequence_length"), ColumnKey("total_sequences")),
                     (ColumnKey("percent_duplicates"), ColumnKey("total_sequences")),
-                    (ColumnKey("median_sequence_length"), ColumnKey("total_sequences")),
                 ],
                 extra_functions=[_summarize_statues],
             ),

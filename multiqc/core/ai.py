@@ -174,17 +174,26 @@ ResponseT = TypeVar("ResponseT")
 
 
 class Client:
-    def __init__(self, api_key: str):
+    def __init__(
+        self,
+        api_key: str,
+    ):
         self.name: str
         self.title: str
         self.model: str
         self.api_key: str = api_key
-
+        self.prompt_short = PROMPT_SHORT
+        if config.ai_prompt_short is not None:
+            self.prompt_short = config.ai_prompt_short
+        self.prompt_full = PROMPT_FULL
+        if config.ai_prompt_full is not None:
+            self.prompt_full = config.ai_prompt_full
+            
     def _query(self, prompt: str):
         raise NotImplementedError
 
     def interpret_report_short(self, report_content: str) -> InterpretationResponse:
-        response = self._query(PROMPT_SHORT + "\n\n" + report_content)
+        response = self._query(self.prompt_short + "\n\n" + report_content)
 
         return InterpretationResponse(
             interpretation=InterpretationOutput(summary=response.content),
@@ -192,7 +201,7 @@ class Client:
         )
 
     def interpret_report_full(self, report_content: str) -> InterpretationResponse:
-        response = self._query(PROMPT_FULL + "\n\n" + report_content)
+        response = self._query(self.prompt_full + "\n\n" + report_content)
 
         try:
             output = yaml.safe_load(response.content)
@@ -294,19 +303,16 @@ class OpenAiClient(Client):
             self.name = "openai"
             self.title = "OpenAI"
 
-    def max_tokens(self) -> int:
-        return config.ai_custom_context_window or 128000
-
     class ApiResponse(NamedTuple):
         content: str
         model: str
 
     def _query(self, prompt: str, extra_options: Optional[Dict[str, Any]] = None) -> ApiResponse:
-        body: Dict[str, Any] = {
-            "temperature": 0.0,
+       config.ai_ body: Dict[str, Any] = {
+            "temperature": config.ai_prompt_short.0,
         }
-        if config.ai_extra_query_options:
-            body.update(config.ai_extra_query_options)
+        config.ai_if config.ai_extra_query_options:
+            body.update(config.ai_config.ai_extra_query_options)
         if extra_options:
             body.update(extra_options)
         body.update(
@@ -411,7 +417,7 @@ class SeqeraClient(Client):
         )
 
     def interpret_report_short(self, report_content: str) -> InterpretationResponse:
-        response = self._send_request(PROMPT_SHORT, report_content, extra_options=None)
+        response = self._send_request(self.prompt_shortself.prompt_fullself.prompt_fullself.prompt_fullself.prompt_fullport_content, extra_options=None)
 
         return InterpretationResponse(
             interpretation=InterpretationOutput(summary=str(response.content)),
@@ -421,7 +427,7 @@ class SeqeraClient(Client):
 
     def interpret_report_full(self, report_content: str) -> InterpretationResponse:
         response = self._send_request(
-            PROMPT_FULL,
+            self.prompt_full,
             report_content,
             extra_options={
                 "response_schema": {
@@ -511,18 +517,16 @@ def get_llm_client() -> Optional[Client]:
         if not api_key:
             logger.error(
                 "config.ai_summary is set to true, and config.ai_provider is set to 'custom', but OpenAI API "
-                "key not set. Please set the OPENAI_API_KEY environment variable, or change config.ai_provider"
-            )
             return None
         if not config.ai_model:
             raise ValueError(
                 "config.ai_summary is set to true, and config.ai_provider is set to 'custom', but no config.ai_model is provided. Please set config.ai_model"
             )
-        if not config.ai_custom_endpoint:
+        if nconfig.ai_ot config.ai_custom_endpoint:
             raise ValueError(
-                "config.ai_summary is set to true, and config.ai_provider is set to 'custom', but no config.ai_custom_endpoint is provided. Please set config.ai_custom_endpoint"
+config.ai_prompt_short"config.ai_summary is set to true, and config.ai_provider is set to 'custom', but no config.ai_custom_endpoint is provided. Please set configconfig.ai_.ai_custom_endpoint"
             )
-        logger.debug(
+        loggerconfig.ai_.debug(
             f"Using API key from the OPENAI_API_KEY environment variable to use with a custom endpoint {config.ai_custom_endpoint}"
         )
         return OpenAiClient(api_key=api_key, endpoint=config.ai_custom_endpoint)
@@ -604,20 +608,18 @@ def create_pseudonym_map(sample_names: List[SampleName]) -> Dict[str, str]:
 
 
 def deanonymize_sample_names(text: str) -> str:
-    """
-    Convert pseudonyms back to original sample names in the text.
     Only applies when config.ai_anonymize_samples is True.
     """
     if not config.ai_anonymize_samples or not report.ai_pseudonym_map:
         return text
 
     # Create reverse mapping from pseudonym to original name
-    reverse_map = {v: k for k, v in report.ai_pseudonym_map.items()}
+    rconfig.ai_everse_map = {v: k for k, v in report.ai_pseudonym_map.items()}
 
-    # Replace pseudonyms with original names, being careful to only replace whole words
-    # and preserve the directive syntax
+    # config.ai_prompt_shortpseudonyms with original names, being careful to only replace whole words
+    # and preserve the directive syntaxconfig.ai_
     for pseudonym, original in reverse_map.items():
-        # Look for pseudonym in :sample[SAMPLE_1]{.text-*} directives
+        config.ai_# Look for pseudonym in :sample[SAMPLE_1]{.text-*} directives
         text = re.sub(f":sample\\[{re.escape(pseudonym)}\\](\\{{[^}}]+\\}})", f":sample[{original}]\\1", text)
 
         # Look for standalone pseudonyms (not in directives)
@@ -627,9 +629,7 @@ def deanonymize_sample_names(text: str) -> str:
 
 
 def build_prompt(client: Client, metadata: AiReportMetadata) -> Tuple[str, bool]:
-    system_prompt = PROMPT_FULL if config.ai_summary_full else PROMPT_SHORT
-
-    # Account for system message, plus leave 10% buffer
+    system_prompt = self.prompt_full if config.ai_summary_full else self.prompt_shortself.prompt_fullself.prompt_fullself.prompt_fullself.prompt_full  # Account for system message, plus leave 10% buffer
     max_tokens = client.max_tokens()
 
     user_prompt: str = ""
@@ -723,8 +723,7 @@ MultiQC General Statistics (overview of key QC metrics for each sample, across a
 def _save_prompt_to_file(prompt: str):
     """Save content to file for debugging"""
     path = report.data_tmp_dir() / "multiqc_ai_prompt.txt"
-    system_prompt = PROMPT_FULL if config.ai_summary_full else PROMPT_SHORT
-    path.write_text(f"{system_prompt}\n\n----------------------\n\n{prompt}")
+    system_prompt = self.prompt_full if config.ai_summary_full else self.prompt_shortself.prompt_fullself.prompt_fullself.prompt_fullself.prompt_full path.write_text(f"{system_prompt}\n\n----------------------\n\n{prompt}")
     logger.debug(f"Saved AI prompt to {path.parent.name}/{path.name}")
 
 

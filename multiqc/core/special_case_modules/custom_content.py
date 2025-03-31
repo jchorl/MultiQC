@@ -1,6 +1,7 @@
 """Core MultiQC module to parse output from custom script output"""
 
 import base64
+import itertools
 import json
 import logging
 import os
@@ -135,6 +136,19 @@ def custom_module_classes() -> List[BaseMultiqcModule]:
                     break
                 assert parsed_dict is not None
                 parsed_dict["id"] = parsed_dict.get("id", f["s_name"])
+
+                # json doesn't support int/float dict keys,
+                # so try to infer if the user meant int/float
+                if isinstance(parsed_dict["data"], dict):
+                    all_keys = list(itertools.chain.from_iterable([v.keys() for v in parsed_dict["data"].values()]))
+                    if all(isint_str(k) for k in all_keys):
+                        for data_key in parsed_dict["data"]:
+                            parsed_dict["data"][data_key] = {int(k): v for k, v in parsed_dict["data"][data_key].items()}
+                    elif all(isfloat_str(k) for k in all_keys):
+                        for data_key in parsed_dict["data"]:
+                            parsed_dict["data"][data_key] = {float(k): v for k, v in parsed_dict["data"][data_key].items()}
+
+
             elif f_extension in [".png", ".jpeg", ".jpg", ".gif", ".webp", ".tiff"]:
                 # image is an exception - will return a file handler
                 image_string = base64.b64encode(cast(BufferedReader, f["f"]).read()).decode("utf-8")
@@ -746,6 +760,26 @@ def unquote(s: T) -> T:
     if isinstance(s, str) and (s.startswith('"') and s.endswith('"') or s.startswith("'") and s.endswith("'")):
         return s[1:-1]  # type: ignore
     return s
+
+
+def isint_str(val: str) -> bool:
+    """Check if a string can be parsed as a int"""
+    try:
+        int(val)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def isfloat_str(val: str) -> bool:
+    """Check if a string can be parsed as a float"""
+    try:
+        float(val)
+    except ValueError:
+        return False
+    else:
+        return True
 
 
 def isnumber(val: Any) -> bool:

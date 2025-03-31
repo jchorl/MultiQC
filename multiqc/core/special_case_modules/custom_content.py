@@ -180,8 +180,15 @@ def custom_module_classes() -> List[BaseMultiqcModule]:
                     _ccdict = ccdict_by_id[ModuleId(_c_id)]
                     if isinstance(parsed_item, dict) and isinstance(_ccdict.data, dict):
                         _ccdict.data.update(parsed_item)
-                    else:
+                    elif not _ccdict.data:
                         _ccdict.data = parsed_item
+                    elif parsed_dict.get("plot_type") == "linegraph":
+                        assert isinstance(parsed_item, list)
+                        assert len(_ccdict.data) == len(parsed_item), f"Cannot merge {parsed_item} into {_ccdict.data}"
+                        for idx, item in enumerate(_ccdict.data):
+                            item.update(parsed_item[idx])
+                    else:
+                        raise ValueError(f"Unsupported data type: {parsed_item}")
                     assert isinstance(_ccdict.config, dict)
                     _ccdict.config.update({j: k for j, k in parsed_dict.items() if j != "data"})
                 else:

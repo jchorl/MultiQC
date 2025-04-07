@@ -207,6 +207,10 @@ def custom_module_classes() -> List[BaseMultiqcModule]:
                     elif _ccdict.data == parsed_item:
                         # if the data is the same, just ignore it
                         pass
+                    elif "Data is too large" in parsed_item:
+                        _ccdict.data = parsed_item
+                    elif "Data is too large" in _ccdict.data:
+                        pass
                     else:
                         raise ValueError(f"Unsupported data type: {parsed_item}")
 

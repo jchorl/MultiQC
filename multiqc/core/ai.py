@@ -494,8 +494,18 @@ class AWSBedrockClient(Client):
         self.title = "AWS Bedrock"
 
         import boto3  # type: ignore
+        from botocore.config import Config  # type: ignore
 
-        self.client = boto3.client(service_name="bedrock-runtime")
+        boto_config = Config(
+            retries={
+                "max_attempts": 1, # handled with custom backoff
+            }
+        )
+
+        self.client = boto3.client(
+            service_name="bedrock-runtime",
+            config=boto_config,
+        )
 
     def max_tokens(self) -> int:
         return config.ai_custom_context_window or 200000
@@ -503,6 +513,38 @@ class AWSBedrockClient(Client):
     class ApiResponse(NamedTuple):
         content: str
         model: str
+
+    def _invoke_model_with_retries(self, body: str) -> dict:
+        import random
+        import time
+
+        from botocore.exceptions import ClientError  # type: ignore
+
+        backoff_seconds_min = 30 # start at 30 seconds
+        backoff_seconds = backoff_seconds_min
+        backoff_seconds_max = 300 # cap at 5 minutes
+        retries = config.ai_retries or 3
+
+        for attempt in range(1, retries + 1):
+            try:
+                return self.client.invoke_model(
+                    body=body, modelId=self.model, accept="application/json", contentType="application/json"
+                )
+            except ClientError as e:
+                if attempt == retries:
+                    logger.error(f"Failed to get a response from {self.title}. Error: {e}")
+                    raise
+
+                # backoff between 30s and 5m
+                # as rate limits are typically tokens-per-minute
+                sleep_time = random.uniform(backoff_seconds_min, backoff_seconds)
+                logger.warning(
+                    f"Failed to get a response from {self.title} (attempt {attempt}/{retries}). Error: {e}. "
+                    f"Retrying in {sleep_time}s..."
+                )
+
+                time.sleep(sleep_time)
+                backoff_seconds = min(backoff_seconds * 2, backoff_seconds_max)
 
     def _query(self, prompt: str) -> ApiResponse:
         # TODO consider error-handling/backoff
@@ -517,9 +559,7 @@ class AWSBedrockClient(Client):
             }
         )
 
-        response = self.client.invoke_model(
-            body=body, modelId=self.model, accept="application/json", contentType="application/json"
-        )
+        response = self._invoke_model_with_retries(body=body)
 
         response_body = json.loads(response["body"].read())
         content = response_body["content"][0]["text"]  # Extract the assistant's response

@@ -527,6 +527,7 @@ class AWSBedrockClient(Client):
             or len(response_body["content"]) != 1
             or "text" not in response_body["content"][0]
         ):
+            logger.error(f"bedrock prompt: {prompt}")
             logger.error(f"bedrock response content: {response_body}")
             raise ValueError("Unexpected bedrock response body")
         content = response_body["content"][0]["text"]  # Extract the assistant's response

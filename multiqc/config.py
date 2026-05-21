@@ -246,7 +246,7 @@ avail_templates: Dict[str, EntryPoint]
 
 export_plots_timeout: int
 
-parquet_format: Literal["long", "wide"]
+parquet_format: Literal["long", "wide", "wide-per-table"]
 
 
 def load_defaults():

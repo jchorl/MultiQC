@@ -38,6 +38,11 @@ REASONING_MODELS = {
 }
 
 
+REFURSAL_STUB_CONTENT = """\
+AI summary could not be generated as the request was refused by the model
+"""
+
+
 def is_reasoning_model(model_name: str) -> bool:
     """Check if a model is a reasoning model based on its name."""
     if not model_name:
@@ -522,7 +527,16 @@ class AWSBedrockClient(Client):
         )
 
         response_body = json.loads(response["body"].read())
-        content = response_body["content"][0]["text"]  # Extract the assistant's response
+        if response_body["stop_reason"] == "refusal":
+            return AWSBedrockClient.ApiResponse(content=REFURSAL_STUB_CONTENT, model=self.model)
+        if not response_body.get("content", []):
+            logger.error(f"bedrock response does not have 'content': {response_body}")
+            raise ValueError("Unexpected bedrock response body")
+        text_blocks = [b for b in response_body["content"] if b["type"] == "text"]
+        if len(text_blocks) != 1:
+            logger.error(f"bedrock response does not contain 1 text block: {response_body}")
+            raise ValueError("Unexpected bedrock response body")
+        content = text_blocks[0]["text"]  # Extract the assistant's response
         return AWSBedrockClient.ApiResponse(content=content, model=self.model)
 
 

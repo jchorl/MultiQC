@@ -238,7 +238,7 @@ class ViolinPlotInputData(NormalizedPlotInputData[TableConfig]):
             "pconfig": pl.Utf8,
             "col1_header": pl.Utf8,
         }
-        return pl.DataFrame(records, schema_overrides=schema_overrides)
+        return pl.DataFrame(records, schema_overrides=schema_overrides, infer_schema_length=1000)
 
     @classmethod
     def from_df(

@@ -474,6 +474,8 @@ class NormalizedPlotInputData(BaseModel, Generic[PConfigT]):
 
         This function handles writing both the data and the plot config.
         """
+        if config.parquet_format == "omit":
+            return
 
         # Custom JSON serialization to handle NaN values
         def nan_safe_dumps(obj):

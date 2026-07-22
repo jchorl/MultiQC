@@ -414,7 +414,8 @@ def _write_data_files(data_dir: Path) -> None:
     logger.debug(f"Moving data file from '{report.data_tmp_dir()}' to '{data_dir}'")
 
     # Save metadata to parquet file
-    plot_data_store.save_report_metadata()
+    if config.parquet_format != "omit":
+        plot_data_store.save_report_metadata()
 
     shutil.copytree(
         report.data_tmp_dir(),

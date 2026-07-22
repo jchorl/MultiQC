@@ -493,8 +493,10 @@ Currently MultiQC offers two format options for the parquet output, but we might
 
 2. **Wide format**: Data is stored with each metric as a separate column, prefixed with the table name and optional namespace. While more intuitive for analytics, it may hit limits on the maximum number of columns in certain edge cases, and can have issues with mixed types (since Parquet requires columns to have consistent types).
 
+3. **Omit**: Skip generating and writing the `multiqc.parquet` file entirely. Note that this means the report data cannot be reloaded from `multiqc_data/` in a later run.
+
 You can configure the format in your MultiQC configuration file:
 
 ```yaml
-parquet_format: "long" # or "wide"
+parquet_format: "long" # or "wide", or "omit"
 ```
